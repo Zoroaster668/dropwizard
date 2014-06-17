@@ -11,8 +11,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -43,6 +41,7 @@ import com.sun.jersey.client.apache4.config.DefaultApacheHttpClient4Config;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpParams;
+import org.slf4j.LoggerFactory;
 
 /**
  * A convenience class for building {@link Client} instances.
@@ -249,9 +248,7 @@ public class JerseyClientBuilder {
         return client;
     }
 
-    //CHANGED
     private ApacheHttpClient4Handler buildHandler(String name) {
-//        return new ApacheHttpClient4Handler(builder.build(name), null, true);
         return createDefaultClientHandler(buildConfig(objectMapper), name);
     }
 
@@ -265,14 +262,12 @@ public class JerseyClientBuilder {
         return config;
     }
 
-    //ADDED (from ApacheHttpClient4)
     private ApacheHttpClient4Handler createDefaultClientHandler(ClientConfig cc, String name) {
         //these warnings are changed slightly from the original; we warn on any value instead of checking class
         if(cc != null) {
             Object connectionManager = cc.getProperties().get(ApacheHttpClient4Config.PROPERTY_CONNECTION_MANAGER);
             if(connectionManager != null) {
-                Logger.getLogger(ApacheHttpClient4.class.getName()).log(
-                        Level.WARNING,
+                LoggerFactory.getLogger(ApacheHttpClient4.class.getName()).warn(
                         "Ignoring value of property " + ApacheHttpClient4Config.PROPERTY_CONNECTION_MANAGER +
                                 " (" + connectionManager.getClass().getName() +
                                 ") - client only uses InstrumentedConnectionManager."
@@ -281,8 +276,7 @@ public class JerseyClientBuilder {
 
             Object httpParams = cc.getProperties().get(ApacheHttpClient4Config.PROPERTY_HTTP_PARAMS);
             if(httpParams != null) {
-                Logger.getLogger(ApacheHttpClient4.class.getName()).log(
-                        Level.WARNING,
+                LoggerFactory.getLogger(ApacheHttpClient4.class.getName()).warn(
                         "Ignoring value of property " + ApacheHttpClient4Config.PROPERTY_HTTP_PARAMS +
                                 " (" + httpParams.getClass().getName() +
                                 ") - params are built by HttpClientBuilder from client config."
@@ -338,7 +332,6 @@ public class JerseyClientBuilder {
         return new ApacheHttpClient4Handler(client, cookieStore, preemptiveBasicAuth);
     }
 
-    //ADDED (from ApacheHttpClient4)
     private static URI getProxyUri(final Object proxy) {
         if (proxy instanceof URI) {
             return (URI) proxy;
